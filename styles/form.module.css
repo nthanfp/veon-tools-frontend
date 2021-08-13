@@ -1,0 +1,7 @@
+.formTextWhite {
+  color: #f8f8ff;
+}
+
+.formTextWhite:focus {
+  color: #f8f8ff;
+}
