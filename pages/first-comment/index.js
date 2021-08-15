@@ -36,6 +36,8 @@ const FirstComment = () => {
     instagram_id: '',
     target: '',
     comment: '',
+    blacklist_word: '',
+    run_speed: '',
     max_comment_per_day: '',
     comment_likes_quantity: '',
   };
@@ -49,6 +51,11 @@ const FirstComment = () => {
       .required('Required!'),
     comment: Yup.string()
       .min(5, 'Minimum 5 characters')
+      .required('Required!'),
+    blacklist_word: Yup.string()
+      .min(5, 'Minimum 5 characters'),
+    run_speed: Yup.number()
+      .min(60, 'Minimum 60 seconds')
       .required('Required!'),
     max_comment_per_day: Yup.number()
       .max(15, 'Maximum 15 comments per day')
@@ -257,7 +264,38 @@ const FirstComment = () => {
                           </Form.Group>
 
                           <Form.Group className="mb-3">
-                            <Form.Label>Max comments per day</Form.Label>
+                            <Form.Label>Blacklist Word</Form.Label>
+                            <Form.Control
+                              as="textarea"
+                              rows={3}
+                              placeholder="Blacklist word"
+                              name="blacklist_word"
+                              value={formik.values.blacklist_word}
+                              onChange={formik.handleChange}
+                              isInvalid={!!formik.errors.blacklist_word}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {formik.errors.blacklist_word}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+
+                          <Form.Group className="mb-3">
+                            <Form.Label>Run Speed</Form.Label>
+                            <Form.Control
+                              type="number"
+                              placeholder="Run speed (seconds)"
+                              name="run_speed"
+                              value={formik.values.run_speed}
+                              onChange={formik.handleChange}
+                              isInvalid={!!formik.errors.run_speed}
+                            />
+                            <Form.Control.Feedback type="invalid">
+                              {formik.errors.run_speed}
+                            </Form.Control.Feedback>
+                          </Form.Group>
+
+                          <Form.Group className="mb-3">
+                            <Form.Label>Max Comments per Day</Form.Label>
                             <Form.Control
                               type="number"
                               placeholder="Max comments per day"
@@ -272,7 +310,7 @@ const FirstComment = () => {
                           </Form.Group>
 
                           <Form.Group className="mb-3">
-                            <Form.Label>Comment likes quantity</Form.Label>
+                            <Form.Label>Comment Likes Quantity</Form.Label>
                             <Form.Control
                               type="number"
                               placeholder="Max comments per day"

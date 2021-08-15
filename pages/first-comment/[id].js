@@ -12,6 +12,7 @@ import {
   Button,
   Table,
   Badge,
+  Modal,
 } from 'react-bootstrap';
 
 import { API_URL } from '../../utils/const';
@@ -31,13 +32,15 @@ const FirstCommentDetail = (props) => {
     },
   });
   const [data, setData] = useState({});
+  const [logData, setLogData] = useState([]);
   const [describe, setDescribe] = useState({});
-  const [server, setServer] = useState({});
   const [target, setTarget] = useState([]);
   const [comment, setComment] = useState([]);
   const [instagram, setInstagram] = useState({});
   const [dataId, setDataId] = useState(id);
   const [update, setUpdate] = useState('');
+  const [showLog, setShowLog] = useState(false);
+  const [showLogTxt, setShowLogTxt] = useState(false);
 
   const AuthContext = useAuthContext();
   const myProfile = AuthContext.getUser();
@@ -68,7 +71,6 @@ const FirstCommentDetail = (props) => {
       .then((res) => {
         const data = res.data.data[0];
         if (data === undefined) {
-          console.log('Undefined data');
           setDescribe({
             status: 'stopped',
             name: '',
@@ -78,7 +80,6 @@ const FirstCommentDetail = (props) => {
             pm2_env: '',
           });
         } else {
-          console.log(data);
           if (data.pid != 0) {
             setDescribe({
               status: 'running',
@@ -100,7 +101,40 @@ const FirstCommentDetail = (props) => {
           }
         }
       });
+
+    const dataLog = {
+      type: 'FIRST_COMMENT',
+      ref: dataId,
+    };
+    axios
+      .post(`${API_URL}/log/find`, dataLog, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      })
+      .then((res) => {
+        setLogData(res.data.data);
+      });
   }, [update]);
+
+  const handleCloseLog = () => setShowLog(false);
+  const handleShowLog = () => {
+    axios
+      .get(`${API_URL}/log/file/firstcomment-${dataId}.stdout.log`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      })
+      .then((res) => {
+        setUpdate('logtext');
+        setShowLogTxt(res.data);
+        console.log(res);
+      })
+      .catch((err) => {});
+    setShowLog(true);
+  };
 
   const handleStart = () => {
     axios
@@ -166,7 +200,7 @@ const FirstCommentDetail = (props) => {
       });
   };
 
-  console.log(describe);
+  console.log(showLogTxt);
 
   return (
     <>
@@ -197,7 +231,7 @@ const FirstCommentDetail = (props) => {
                   <td>
                     <div className="d-flex justify-content-start mb-2">
                       <div className="px-2">
-                        <Button variant="primary">
+                        <Button variant="primary" onClick={handleShowLog}>
                           <FileText /> Logs
                         </Button>
                       </div>
@@ -306,9 +340,71 @@ const FirstCommentDetail = (props) => {
                 </tr>
               </tbody>
             </Table>
+            <hr />
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Status</th>
+                  <th>Link</th>
+                  <th>Username</th>
+                </tr>
+              </thead>
+              <tbody>
+                {logData.length > 0
+                  ? logData.map((log) => {
+                      return (
+                        <tr key={log._id}>
+                          <td>
+                            <span className="badge bg-success">
+                              {log.data.status}
+                            </span>
+                          </td>
+                          <td>{log.data.link}</td>
+                          <td>{log.data.username}</td>
+                        </tr>
+                      );
+                    })
+                  : ''}
+
+                {logData.length === 0 ? (
+                  <tr>
+                    <td colspan="3">No data found</td>
+                  </tr>
+                ) : (
+                  ''
+                )}
+              </tbody>
+            </Table>
           </Col>
         </Row>
       </Container>
+      <Modal show={showLog} onHide={handleCloseLog} size="lg">
+        <Modal.Header>
+          <Modal.Title>Logs</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form.Group className="mb-3">
+            <Form.Label>Target</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={12}
+              placeholder="Log list"
+              value={showLogTxt}
+              wrap="off"
+              disabled
+            />
+          </Form.Group>
+          <pre></pre>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseLog}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleCloseLog}>
+            Save Changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
