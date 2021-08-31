@@ -2,6 +2,7 @@ import { AppWrapper } from '../contexts/state';
 import { AuthWrapper } from '../contexts/AuthContext';
 
 import '../styles/flatly.css';
+import '../styles/custom.css';
 
 function MyApp({ Component, pageProps }) {
   console.log(process.env.STAGE);

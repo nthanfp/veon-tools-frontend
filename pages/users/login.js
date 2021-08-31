@@ -87,6 +87,8 @@ const Login = () => {
       });
   };
 
+  // console.log('test', process.env.STAGE);
+
   return (
     <div>
       <Head title="Login" />
@@ -97,6 +99,7 @@ const Login = () => {
             <Card border="primary">
               <Card.Header className="bg-primary text-white">Login</Card.Header>
               <Card.Body>
+                <p>{API_URL}</p>
                 <Formik
                   initialValues={initialValues}
                   validationSchema={validationSchema}

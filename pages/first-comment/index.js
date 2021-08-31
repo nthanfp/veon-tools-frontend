@@ -137,41 +137,102 @@ const FirstComment = () => {
     });
   };
 
-  const handleDescribe = async (id) => {
-    return axios
-      .get(`${API_URL}/firstcomment/describe/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
-      })
-      .then((res) => {
-        const data = res.data.data[0];
-        if (data === undefined) {
-          return { status: 'stopped' };
-        } else {
-          if (data.pid != 0) {
-            return { status: 'running' };
+  const handleDescribe = async (id) =>
+    new Promise((resolve, reject) => {
+      axios
+        .get(`${API_URL}/firstcomment/describe/${id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token,
+          },
+        })
+        .then((res) => {
+          const data = res.data.data[0];
+          if (data === undefined) {
+            resolve({ status: 'stopped' });
           } else {
-            return { status: 'stopped' };
+            if (data.pid != 0) {
+              resolve({ status: 'running' });
+            } else {
+              resolve({ status: 'stopped' });
+            }
           }
-        }
-      });
-  };
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
+
+  const handleListSetting = async (id) =>
+    new Promise((resolve, reject) => {
+      axios
+        .get(`${API_URL}/firstcomment`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': token,
+          },
+        })
+        .then((res) => {
+          resolve(res.data.data);
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    });
 
   useEffect(() => {
     const user_id = myProfile.id;
-    axios
-      .get(`${API_URL}/firstcomment`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
-      })
-      .then((res) => {
-        setUpdate('');
-        setListSetting(res.data.data);
+
+    async function fetchRepoInfos() {
+      // load repository details for this array of repo URLs
+      const settings = await handleListSetting();
+
+      // map through the repo list
+      const promises = settings.map(async (setting) => {
+        // request details from GitHub’s API with Axios
+        // const response = await axios({
+        //   method: 'GET',
+        //   url: `${API_URL}/firstcomment/describe/${setting._id}`,
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //     'x-access-token': token,
+        //   },
+        // });
+        const describe = await handleDescribe(setting._id);
+
+        return { describe, ...setting };
       });
+
+      // wait until all promises resolve
+      const results = await Promise.all(promises);
+      setListSetting(results);
+
+      console.log(results);
+    }
+
+    fetchRepoInfos();
+
+    // (async () => {
+    //   const settings = await handleListSetting();
+
+    //   const unresolved = settings.map(async (setting, idx) => {
+    //     // let describe = await handleDescribe(setting._id);
+    //     let response = await axios.get(
+    //       `${API_URL}/firstcomment/describe/${setting._id}`,
+    //       {
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //           'x-access-token': token,
+    //         },
+    //       }
+    //     );
+    //     let data = { describe: response.data.data[0], ...setting };
+    //     return data;
+    //   });
+
+    //   const resolved = await Promise.all(unresolved);
+    //   setListSetting(resolved);
+    // })();
   }, [update]);
 
   useEffect(() => {
@@ -186,6 +247,8 @@ const FirstComment = () => {
         setListAccounts(res.data.data);
       });
   }, []);
+
+  console.log(listSetting);
 
   return (
     <>
@@ -350,6 +413,7 @@ const FirstComment = () => {
                 <tr>
                   <th>#</th>
                   <th>Username</th>
+                  <th>Status</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -360,6 +424,7 @@ const FirstComment = () => {
                     <tr key={set._id}>
                       <td>{i}</td>
                       <td>{set.instagram_id.username}</td>
+                      <td>{set.describe.status}</td>
                       <td>
                         <div className="d-flex justify-content-around">
                           <Link href={`/first-comment/${set._id}`}>

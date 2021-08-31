@@ -15,7 +15,7 @@ const Menu = () => {
 
   return (
     <div>
-      <Row className="mt-5 justify-content-center">
+      <Row className="mt-4 justify-content-center">
         <Col className="align-self-center" md lg="10">
           <div className="form-group">
             <label className="form-label">Choose Menu : </label>

@@ -10,7 +10,6 @@ const Home = () => {
   const AuthContext = useAuthContext();
 
   const myProfile = AuthContext.getUser();
-  console.log(myProfile);
   return (
     <>
       <Head title="Home" />
@@ -20,6 +19,7 @@ const Home = () => {
           <Menu />
           <Col className="mt-4" xs lg="10">
             <p>Welcome {myProfile.first_name}!</p>
+            <p>{console.log(process.env)}</p>
           </Col>
         </Row>
       </Container>

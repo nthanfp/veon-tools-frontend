@@ -200,7 +200,8 @@ const FirstCommentDetail = (props) => {
       });
   };
 
-  console.log(showLogTxt);
+  const capitalize = ([first, ...rest]) =>
+    first.toUpperCase() + rest.join('').toLowerCase();
 
   return (
     <>
@@ -214,7 +215,7 @@ const FirstCommentDetail = (props) => {
               <tbody>
                 <tr>
                   <td>
-                    <b>Id</b>
+                    <b>ID</b>
                   </td>
                   <td width="15">
                     <b>:</b>
@@ -341,7 +342,7 @@ const FirstCommentDetail = (props) => {
               </tbody>
             </Table>
             <hr />
-            <Table striped bordered hover>
+            <Table striped bordered hover responsive>
               <thead>
                 <tr>
                   <th>Status</th>
@@ -356,7 +357,7 @@ const FirstCommentDetail = (props) => {
                         <tr key={log._id}>
                           <td>
                             <span className="badge bg-success">
-                              {log.data.status}
+                              {capitalize(log.data.status)}
                             </span>
                           </td>
                           <td>{log.data.link}</td>
