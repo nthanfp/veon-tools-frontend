@@ -23,6 +23,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { Navbar, Head, Menu } from '../../components';
 
 const Home = () => {
+  const [isLoading, setLoading] = useState(false);
   const [listAccounts, setListAccounts] = useState([]);
   const [update, setUpdate] = useState('');
 
@@ -118,6 +119,7 @@ const Home = () => {
   };
 
   useEffect(() => {
+    setLoading(true);
     axios
       .get(`${API_URL}/instagram`, {
         headers: {
@@ -126,8 +128,12 @@ const Home = () => {
         },
       })
       .then((res) => {
+        setLoading(false);
         setUpdate('');
         setListAccounts(res.data.data);
+      })
+      .catch((e) => {
+        setLoading(false);
       });
   }, [update]);
 
@@ -212,31 +218,37 @@ const Home = () => {
                 </tr>
               </thead>
               <tbody>
-                {listAccounts.map((ig, i) => {
-                  i++;
-                  return (
-                    <tr key={ig._id}>
-                      <td>{i}</td>
-                      <td>{ig.username}</td>
-                      <td>
-                        <span className="badge bg-success">Active</span>
-                      </td>
-                      <td>
-                        <div className="d-flex justify-content-around">
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => {
-                              handleDelete(ig._id);
-                            }}
-                          >
-                            <Trash />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="4">Loading...</td>
+                  </tr>
+                ) : (
+                  listAccounts.map((ig, i) => {
+                    i++;
+                    return (
+                      <tr key={ig._id}>
+                        <td>{i}</td>
+                        <td>{ig.username}</td>
+                        <td>
+                          <span className="badge bg-success">Active</span>
+                        </td>
+                        <td>
+                          <div className="d-flex justify-content-around">
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => {
+                                handleDelete(ig._id);
+                              }}
+                            >
+                              <Trash />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </Table>
           </Col>

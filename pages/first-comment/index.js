@@ -23,6 +23,7 @@ import { useAuthContext } from '../../contexts/AuthContext';
 import { Navbar, Head, Menu } from '../../components';
 
 const FirstComment = () => {
+  const [isLoading, setLoading] = useState(false);
   const [listAccounts, setListAccounts] = useState([]);
   const [listSetting, setListSetting] = useState([]);
   const [update, setUpdate] = useState('');
@@ -181,23 +182,12 @@ const FirstComment = () => {
     });
 
   useEffect(() => {
+    setLoading(true);
     const user_id = myProfile.id;
 
     async function fetchRepoInfos() {
-      // load repository details for this array of repo URLs
       const settings = await handleListSetting();
-
-      // map through the repo list
       const promises = settings.map(async (setting) => {
-        // request details from GitHub’s API with Axios
-        // const response = await axios({
-        //   method: 'GET',
-        //   url: `${API_URL}/firstcomment/describe/${setting._id}`,
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //     'x-access-token': token,
-        //   },
-        // });
         const describe = await handleDescribe(setting._id);
 
         return { describe, ...setting };
@@ -206,33 +196,10 @@ const FirstComment = () => {
       // wait until all promises resolve
       const results = await Promise.all(promises);
       setListSetting(results);
-
-      console.log(results);
+      setLoading(false);
     }
 
     fetchRepoInfos();
-
-    // (async () => {
-    //   const settings = await handleListSetting();
-
-    //   const unresolved = settings.map(async (setting, idx) => {
-    //     // let describe = await handleDescribe(setting._id);
-    //     let response = await axios.get(
-    //       `${API_URL}/firstcomment/describe/${setting._id}`,
-    //       {
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //           'x-access-token': token,
-    //         },
-    //       }
-    //     );
-    //     let data = { describe: response.data.data[0], ...setting };
-    //     return data;
-    //   });
-
-    //   const resolved = await Promise.all(unresolved);
-    //   setListSetting(resolved);
-    // })();
   }, [update]);
 
   useEffect(() => {
@@ -418,36 +385,42 @@ const FirstComment = () => {
                 </tr>
               </thead>
               <tbody>
-                {listSetting.map((set, i) => {
-                  i++;
-                  return (
-                    <tr key={set._id}>
-                      <td>{i}</td>
-                      <td>{set.instagram_id.username}</td>
-                      <td>{set.describe.status}</td>
-                      <td>
-                        <div className="d-flex justify-content-around">
-                          <Link href={`/first-comment/${set._id}`}>
-                            <a>
-                              <Button variant="primary" size="sm">
-                                Detail
-                              </Button>
-                            </a>
-                          </Link>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => {
-                              handleDelete(set._id);
-                            }}
-                          >
-                            <Trash />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {isLoading ? (
+                  <tr>
+                    <td colSpan="4">Loading...</td>
+                  </tr>
+                ) : (
+                  listSetting.map((set, i) => {
+                    i++;
+                    return (
+                      <tr key={set._id}>
+                        <td>{i}</td>
+                        <td>{set.instagram_id.username}</td>
+                        <td>{set.describe.status}</td>
+                        <td>
+                          <div className="d-flex justify-content-around">
+                            <Link href={`/first-comment/${set._id}`}>
+                              <a>
+                                <Button variant="primary" size="sm">
+                                  Detail
+                                </Button>
+                              </a>
+                            </Link>
+                            <Button
+                              variant="danger"
+                              size="sm"
+                              onClick={() => {
+                                handleDelete(set._id);
+                              }}
+                            >
+                              <Trash />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </Table>
           </Col>
