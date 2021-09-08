@@ -1,6 +1,6 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { PlayCircle, StopCircle, FileText } from 'react-bootstrap-icons';
 import {
@@ -19,18 +19,12 @@ import { API_URL } from '../../utils/const';
 import { WithAuth } from '../../contexts/WithAuth';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { Navbar, Head, Menu } from '../../components';
+import { AutoScrollingTextarea } from '../../components';
 
 const FirstCommentDetail = (props) => {
   const { id } = props;
   const router = useRouter();
 
-  const [level, setLevel] = useState({
-    level1: {
-      level2: {
-        level3: 'OK!',
-      },
-    },
-  });
   const [data, setData] = useState({});
   const [logData, setLogData] = useState([]);
   const [describe, setDescribe] = useState({});
@@ -42,9 +36,96 @@ const FirstCommentDetail = (props) => {
   const [showLog, setShowLog] = useState(false);
   const [showLogTxt, setShowLogTxt] = useState(false);
 
+  const messagesEndRef = useRef(null);
+
   const AuthContext = useAuthContext();
   const myProfile = AuthContext.getUser();
   const token = AuthContext.getToken();
+
+  const capitalize = ([first, ...rest]) =>
+    first.toUpperCase() + rest.join('').toLowerCase();
+
+  const handleCloseLog = () => setShowLog(false);
+
+  const handleShowLog = () => {
+    axios
+      .get(`${API_URL}/log/file/firstcomment-${dataId}.stdout.log`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      })
+      .then((res) => {
+        setUpdate('logtext');
+        setShowLogTxt(res.data);
+      })
+      .catch((err) => {});
+    setShowLog(true);
+  };
+
+  const handleStart = () => {
+    axios
+      .get(`${API_URL}/firstcomment/start/${dataId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      })
+      .then((res) => {
+        setUpdate('start');
+        Swal.fire({
+          icon: 'success',
+          title: 'Success...',
+        });
+      })
+      .catch((err) => {
+        if (err.response.data.message) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.response.data.message,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.message,
+          });
+        }
+      });
+  };
+
+  const handleStop = () => {
+    axios
+      .get(`${API_URL}/firstcomment/stop/${dataId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+      })
+      .then((res) => {
+        setUpdate('stop');
+        Swal.fire({
+          icon: 'success',
+          title: 'Stopped...',
+        });
+      })
+      .catch((err) => {
+        if (err.response.data.message) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.response.data.message,
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: err.message,
+          });
+        }
+      });
+  };
 
   useEffect(() => {
     setUpdate('');
@@ -117,91 +198,6 @@ const FirstCommentDetail = (props) => {
         setLogData(res.data.data);
       });
   }, [update]);
-
-  const handleCloseLog = () => setShowLog(false);
-  const handleShowLog = () => {
-    axios
-      .get(`${API_URL}/log/file/firstcomment-${dataId}.stdout.log`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
-      })
-      .then((res) => {
-        setUpdate('logtext');
-        setShowLogTxt(res.data);
-        console.log(res);
-      })
-      .catch((err) => {});
-    setShowLog(true);
-  };
-
-  const handleStart = () => {
-    axios
-      .get(`${API_URL}/firstcomment/start/${dataId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
-      })
-      .then((res) => {
-        setUpdate('start');
-        Swal.fire({
-          icon: 'success',
-          title: 'Success...',
-        });
-      })
-      .catch((err) => {
-        if (err.response.data.message) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: err.response.data.message,
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: err.message,
-          });
-        }
-      });
-  };
-
-  const handleStop = () => {
-    axios
-      .get(`${API_URL}/firstcomment/stop/${dataId}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-access-token': token,
-        },
-      })
-      .then((res) => {
-        setUpdate('stop');
-        Swal.fire({
-          icon: 'success',
-          title: 'Stopped...',
-        });
-      })
-      .catch((err) => {
-        if (err.response.data.message) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: err.response.data.message,
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: err.message,
-          });
-        }
-      });
-  };
-
-  const capitalize = ([first, ...rest]) =>
-    first.toUpperCase() + rest.join('').toLowerCase();
 
   return (
     <>
@@ -369,7 +365,7 @@ const FirstCommentDetail = (props) => {
 
                 {logData.length === 0 ? (
                   <tr>
-                    <td colspan="3">No data found</td>
+                    <td colSpan="3">No data found</td>
                   </tr>
                 ) : (
                   ''
@@ -386,7 +382,8 @@ const FirstCommentDetail = (props) => {
         <Modal.Body>
           <Form.Group className="mb-3">
             <Form.Label>Target</Form.Label>
-            <Form.Control
+            <AutoScrollingTextarea
+              className="form-control"
               as="textarea"
               rows={12}
               placeholder="Log list"
@@ -395,7 +392,6 @@ const FirstCommentDetail = (props) => {
               disabled
             />
           </Form.Group>
-          <pre></pre>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseLog}>

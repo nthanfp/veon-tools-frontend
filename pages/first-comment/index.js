@@ -185,21 +185,57 @@ const FirstComment = () => {
     setLoading(true);
     const user_id = myProfile.id;
 
-    async function fetchRepoInfos() {
+    // async function fetchRepoInfos() {
+    //   const settings = await handleListSetting();
+    //   const promises = settings.map(async (setting) => {
+    //     const describe = await handleDescribe(setting._id);
+
+    //     return { describe, ...setting };
+    //   });
+
+    //   // wait until all promises resolve
+    //   const results = await Promise.all(promises);
+    //   setListSetting(results);
+    //   setLoading(false);
+    // }
+
+    // fetchRepoInfos();
+
+    // function fetchData(URL) {
+    //   return axios
+    //     .get(URL)
+    //     .then(function (response) {
+    //       return {
+    //         success: true,
+    //         data: response.data,
+    //       };
+    //     })
+    //     .catch(function (error) {
+    //       return { success: false };
+    //     });
+    // }
+
+    function getAllData(data) {
+      return Promise.all(
+        data.map((setting) => {
+          handleDescribe(setting._id);
+        })
+      );
+    }
+    async function jalan() {
       const settings = await handleListSetting();
-      const promises = settings.map(async (setting) => {
-        const describe = await handleDescribe(setting._id);
-
-        return { describe, ...setting };
-      });
-
-      // wait until all promises resolve
-      const results = await Promise.all(promises);
-      setListSetting(results);
-      setLoading(false);
+      getAllData(settings)
+        .then((resp) => {
+          console.log(resp);
+          setListSetting(results);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     }
 
-    fetchRepoInfos();
+    jalan();
   }, [update]);
 
   useEffect(() => {
