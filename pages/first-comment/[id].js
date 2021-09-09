@@ -2,6 +2,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { PlayCircle, StopCircle, FileText } from 'react-bootstrap-icons';
 import {
   Container,
@@ -341,6 +342,7 @@ const FirstCommentDetail = (props) => {
             <Table striped bordered hover responsive>
               <thead>
                 <tr>
+                  <th>Date</th>
                   <th>Status</th>
                   <th>Link</th>
                   <th>Username</th>
@@ -351,12 +353,17 @@ const FirstCommentDetail = (props) => {
                   ? logData.map((log) => {
                       return (
                         <tr key={log._id}>
+                          <td>{log.data.timestamp}</td>
                           <td>
                             <span className="badge bg-success">
                               {capitalize(log.data.status)}
                             </span>
                           </td>
-                          <td>{log.data.link}</td>
+                          <td>
+                            <Link href={log.data.link}>
+                              <a>{log.data.link}</a>
+                            </Link>
+                          </td>
                           <td>{log.data.username}</td>
                         </tr>
                       );
