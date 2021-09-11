@@ -14,6 +14,7 @@ const Home = () => {
     moment().format('YYYY-MM-DD HH:mm:ss')
   );
   const [profile, setProfile] = useState({});
+  const [stats, setStats] = useState({});
 
   const consumer = useAppContext();
   const AuthContext = useAuthContext();
@@ -34,7 +35,8 @@ const Home = () => {
         },
       })
       .then((res) => {
-        setProfile(res.data.data);
+        setProfile(res.data.data.profile);
+        setStats(res.data.data.stats);
       })
       .catch((err) => {
         console.log(err);
@@ -42,8 +44,6 @@ const Home = () => {
   }, []);
 
   const dateTime = moment().format('MM-DD-YYYY HH:mm:ss');
-
-  console.log(profile.stats.instagram);
 
   return (
     <>
@@ -67,21 +67,21 @@ const Home = () => {
                 </tr>
                 <tr>
                   <td>
-                    <b>Total Instagram Account</b>
+                    <b>Total Instagram Accounts</b>
                   </td>
                   <td width="15">
                     <b>:</b>
                   </td>
-                  <td>{}</td>
+                  <td>{stats.instagram} Accounts</td>
                 </tr>
                 <tr>
                   <td>
-                    <b>Total First Comment Setting</b>
+                    <b>Total First Comment Settings</b>
                   </td>
                   <td width="15">
                     <b>:</b>
                   </td>
-                  <td>0</td>
+                  <td>{stats.firstcomment} </td>
                 </tr>
               </tbody>
             </Table>
