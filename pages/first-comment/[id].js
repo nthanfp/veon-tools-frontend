@@ -1,5 +1,6 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import moment from 'moment';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -353,7 +354,11 @@ const FirstCommentDetail = (props) => {
                   ? logData.map((log) => {
                       return (
                         <tr key={log._id}>
-                          <td>{log.data.timestamp}</td>
+                          <td>
+                            {moment
+                              .unix(log.data.timestamp)
+                              .format('MM-DD-YYYY HH:mm:ss')}
+                          </td>
                           <td>
                             <span className="badge bg-success">
                               {capitalize(log.data.status)}
